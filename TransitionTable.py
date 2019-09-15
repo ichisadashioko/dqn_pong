@@ -175,17 +175,13 @@ class TransitionTable:
             dtype=np.uint8,
         )
         sign = utils.sign(index)
-        end = False
         for i in range(self.histLen):
-            if end:
-                break
-
             pos = index - i
 
             if not utils.sign(pos) == sign:
                 break
             elif self.t[pos] and not (i == 0):
-                end = True
+                break
             else:
                 state[:, :, i] = state_queue[pos]
         return state
@@ -196,3 +192,24 @@ class TransitionTable:
     def sample_batch(self, batch_size=32):
         if len(self) < batch_size:
             return
+
+        rand_indies = random.sample(range(len(self)), batch_size)
+        s_batch = []
+        next_s_batch = []
+        action_batch = []
+        reward_batch = []
+        terminal_batch = []
+        for idx in rand_indies:
+            s, a, r, t, next_s = self.sample(idx)
+            s_batch.append(s)
+            next_s_batch.append(next_s)
+            action_batch.append(a)
+            reward_batch.append(r)
+            terminal_batch.append(t)
+        np_s_batch = np.array(s_batch, dtype=np.uint8)
+        np_next_s_batch = np.array(next_s_batch, dtype=np.uint8)
+        np_action_batch = np.array(action_batch, dtype=np.uint8)
+        np_reward_batch = np.array(reward_batch)
+        np_terminal_batch = np.array(terminal_batch)
+
+        return np_s_batch, np_action_batch, np_reward_batch, np_terminal_batch, np_next_s_batch

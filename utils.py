@@ -37,7 +37,6 @@ def preview_concat_frames(memory, index):
         shape=(memory.state_height * 2, memory.state_width * memory.histLen),
         dtype=np.uint8,
     )
-    # print(f'preview_frame.shape: {preview_frame.shape}')
 
     for i in range(memory.histLen):
         preview_frame[
@@ -49,3 +48,23 @@ def preview_concat_frames(memory, index):
             memory.state_width * i:memory.state_width * (i + 1)
         ] = next_state[:, :, i]
     return preview_frame
+
+def preview_batch_images(image_batch):
+    """
+    Image batch should have shape like (32, 105, 80, 4).
+    """
+    num_rows, height, width, num_cols = image_batch.shape
+    im = np.zeros(shape=(
+        num_rows * height,
+        num_cols * width
+    ), dtype=np.uint8)
+
+    for row in range(num_rows):
+        for col in range(num_cols):
+            x1 = col * width
+            x2 = (col+1) * width
+            y1 = row * height
+            y2 = (row+1) * height
+            im[y1:y2, x1:x2] = image_batch[row, :, :, col]
+
+    return im
