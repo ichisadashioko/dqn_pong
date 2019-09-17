@@ -14,6 +14,7 @@ import pandas as pd
 
 import utils
 from TransitionTable import TransitionTable
+from DQNAgent import DQNAgent
 
 if __name__ == '__main__':
     env_name = 'Pong-v0'
@@ -60,27 +61,29 @@ if __name__ == '__main__':
     # # cv2.destroyAllWindows()
     #=== Populate memory - END ===#
 
-    # memory_save_dir = f'{env_name}/memory/{utils.time_now()}'
-    memory_save_dir = f'{env_name}/memory/20190914_165410'
+    ##=== visualize frames concatenation ===##
+    # rand = False
+    # for i in range(1100, len(memory)):
+    #     if rand:
+    #         index = random.randrange(len(memory))
+    #     else:
+    #         index = i
+    #     print(f'Preview index: {index}')
+    #     if memory.t[index]:
+    #         print(f'Terminal index: {index}')
+    #     preview_frame = utils.preview_concat_frames(memory, index)
+    #     frame = cv2.resize(
+    #         preview_frame,
+    #         None,
+    #         fx=4, fy=4,
+    #         interpolation=cv2.INTER_NEAREST,
+    #     )
+    #     cv2.imshow('frame', frame)
+    #     k = cv2.waitKey(0) & 0xff
+    #     if k == ord('q') or k == 32:
+    #         break
+    #     elif k == ord('r'):
+    #         rand = True
+    # cv2.destroyAllWindows()
 
-    memory.load(memory_save_dir)
-
-    # visualize frames concatenation
-    rand = False
-    for i in range(1100, len(memory)):
-        if rand:
-            index = random.randrange(len(memory))
-        else:
-            index = i
-        print(f'Preview index: {index}')
-        if memory.t[index]:
-            print(f'Terminal index: {index}')
-        preview_frame = utils.preview_concat_frames(memory, index)
-        frame = cv2.resize(preview_frame, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST)
-        cv2.imshow('frame', frame)
-        k = cv2.waitKey(0) & 0xff
-        if k == ord('q') or k == 32:
-            break
-        elif k == ord('r'):
-            rand = True
-    cv2.destroyAllWindows()
+    agent = DQNAgent()
