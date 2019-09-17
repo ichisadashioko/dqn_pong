@@ -16,12 +16,38 @@ import utils
 from TransitionTable import TransitionTable
 from DQNAgent import DQNAgent
 
-if __name__ == '__main__':
-    env_name = 'Pong-v0'
-    # env_name = 'PongNoFrameskip-v4'
-    env = gym.make(env_name)
+env_name = 'Pong-v0'
+# env_name = 'PongNoFrameskip-v4'
+env = gym.make(env_name)
 
-    n_actions = env.action_space.n
-    agent = DQNAgent(
-        n_actions=n_actions,
-    )
+n_actions = env.action_space.n
+agent = DQNAgent(
+    n_actions=n_actions,
+)
+
+num_steps = 100_000
+
+env.seed(0)
+state = env.reset()
+state = utils.process_raw_image(state)
+eps_reward = 0
+
+for i in tqdm(range(num_steps)):
+    # epsilon greedy
+    eps = agent.calc_eps(i)
+    if random.random() < eps or len(agent.memory) == 0:
+        action = random.randrange(agent.n_actions)
+    else:
+        state_batch = np.array([agent.recentState()], dtype=np.uint8)
+        action = np.argmax(agent.target_net.predict(state_batch)[0])
+
+    new_state, reward, done, info = env.step(action)
+    new_state = utils.process_raw_image(new_state)
+    terminal = 1 if done else 0
+    agent.memory.append(state, action, reward, terminal, new_state)
+
+    state = new_state
+    if done:
+        env.seed(0)
+        state = env.reset()
+        state = utils.process_raw_image(state)

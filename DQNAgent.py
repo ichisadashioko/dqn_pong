@@ -63,12 +63,14 @@ class DQNAgent:
             state_width=self.state_width,
             state_height=self.state_height,
         )
+    def recentState(self):
+        return self.memory.concatState(-1, self.memory.next_s)
 
     def calc_eps(self, stepNum):
         eps_range = self.eps_start - self.eps_end
         eps_delta = 1 - (stepNum / self.eps_endt)
         eps_delta = max(0, eps_delta)
-        eps = eps_end + eps_delta
+        eps = self.eps_end + eps_delta
         return eps
 
     def createNetwork(
