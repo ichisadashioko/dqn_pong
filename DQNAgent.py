@@ -31,12 +31,14 @@ class DQNAgent:
         state_height=105,
         histLen=4,
         learning_rate=0.00001,
+        discount=0.97,
         eps_start=1.0,
         eps_end=0.1,
         eps_endt=1_000_000,
     ):
         self.n_actions = n_actions
         self.learning_rate = learning_rate
+        self.discount = discount
         self.histLen = histLen
         self.state_width = state_width
         self.state_height = state_height
@@ -63,6 +65,25 @@ class DQNAgent:
             state_width=self.state_width,
             state_height=self.state_height,
         )
+
+    def train(self):
+        s, a, r, t, s2 = self.memory.sample_batch()
+
+        # invert t to zero future reward of terminal state
+        t = 1 - t
+
+        # take all the old q values
+        old_q = self.policy_net.predict(s)
+        # next q values
+        next_q = self.target_net.predict(s2)
+
+        for i in range(len(a)):
+            old_q[i][a[i]] = r[i] + t[i] * np.max(next_q[i]) * self.discount
+        self.policy_net.fit(
+            x=s,
+            y=old_q,
+        )
+
     def recentState(self):
         return self.memory.concatState(-1, self.memory.next_s)
 

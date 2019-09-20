@@ -25,6 +25,8 @@ agent = DQNAgent(
     n_actions=n_actions,
 )
 
+learn_start = 10_000
+
 num_steps = 100_000
 
 env.seed(0)
@@ -51,3 +53,6 @@ for i in tqdm(range(num_steps)):
         env.seed(0)
         state = env.reset()
         state = utils.process_raw_image(state)
+
+    if i > learn_start:
+        agent.train()
