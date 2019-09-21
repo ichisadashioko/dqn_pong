@@ -84,6 +84,7 @@ class DQNAgent:
         self.policy_net.fit(
             x=s,
             y=old_q,
+            verbose=0,
         )
 
     def recentState(self):

@@ -49,6 +49,7 @@ def preview_concat_frames(memory, index):
         ] = next_state[:, :, i]
     return preview_frame
 
+
 def preview_batch_images(image_batch):
     """
     Image batch should have shape like (32, 105, 80, 4).
@@ -62,9 +63,49 @@ def preview_batch_images(image_batch):
     for row in range(num_rows):
         for col in range(num_cols):
             x1 = col * width
-            x2 = (col+1) * width
+            x2 = (col + 1) * width
             y1 = row * height
-            y2 = (row+1) * height
+            y2 = (row + 1) * height
             im[y1:y2, x1:x2] = image_batch[row, :, :, col]
 
     return im
+
+
+def evaluate_agent(agent, env, num_episodes=10):
+    logs = []
+    for _ in tqdm(range(num_episodes)):
+        ep_a = []
+        ep_r = []
+        ep_t = []
+        ep_q = []
+
+        state_memory = deque(maxlen=4)
+        s = env.reset()
+        s = process_raw_image(s)
+        state_memory.append(s)
+
+        done = False
+        while not done:
+            batch = np.zeros(shape=(1, 105, 80, 4), dtype=np.uint8)
+            for i in range(len(state_memory)):
+                batch[0, :, :, i] = state_memory[-(i + 1)]
+            batch = batch.astype(np.float32) / 255.0
+            q = agent.target_net.predict(batch)[0]
+            action = np.argmax(q)
+            s2, reward, done, info = env.step(action)
+            s2 = process_raw_image(s2)
+            state_memory.append(s2)
+
+            ep_a.append(action)
+            ep_r.append(reward)
+            ep_t.append(done)
+            ep_q.append(q)
+        log = {
+            'ep_a': ep_a,
+            'ep_r': ep_r,
+            'ep_t': ep_t,
+            'ep_q': ep_q,
+        }
+        logs.append(log)
+
+    return logs
