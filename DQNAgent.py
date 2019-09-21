@@ -68,6 +68,8 @@ class DQNAgent:
 
     def train(self):
         s, a, r, t, s2 = self.memory.sample_batch()
+        s = s.astype(np.float32) / 255.0
+        s2 = s2.astype(np.float32) / 255.0
 
         # invert t to zero future reward of terminal state
         t = 1 - t
